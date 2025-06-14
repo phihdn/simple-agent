@@ -31,8 +31,7 @@ if verbose:
 
 # Generate content using the gemini-2.0-flash-001 model
 response = client.models.generate_content(
-    model="gemini-2.0-flash-001",
-    contents=messages
+    model="gemini-2.0-flash-001", contents=messages
 )
 
 # Print the model's response
