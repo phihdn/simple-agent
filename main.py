@@ -2,6 +2,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,10 +18,15 @@ if len(sys.argv) < 2:
 
 prompt = sys.argv[1]
 
+# Create a list of messages for the conversation
+messages = [
+    types.Content(role="user", parts=[types.Part(text=prompt)]),
+]
+
 # Generate content using the gemini-2.0-flash-001 model
 response = client.models.generate_content(
     model="gemini-2.0-flash-001",
-    contents=prompt
+    contents=messages
 )
 
 # Print the model's response
