@@ -23,6 +23,12 @@ messages = [
     types.Content(role="user", parts=[types.Part(text=prompt)]),
 ]
 
+# Check for verbose flag
+verbose = "--verbose" in sys.argv
+
+if verbose:
+    print(f"User prompt: {prompt}")
+
 # Generate content using the gemini-2.0-flash-001 model
 response = client.models.generate_content(
     model="gemini-2.0-flash-001",
@@ -32,6 +38,6 @@ response = client.models.generate_content(
 # Print the model's response
 print(response.text)
 
-# Print token usage
-print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+if verbose:
+    print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+    print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
