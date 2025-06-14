@@ -1,4 +1,5 @@
 import os
+import sys
 from dotenv import load_dotenv
 from google import genai
 
@@ -9,10 +10,17 @@ api_key = os.environ.get("GEMINI_API_KEY")
 # Initialize Gemini client
 client = genai.Client(api_key=api_key)
 
+# Check for command line arguments
+if len(sys.argv) < 2:
+    print("Error: Please provide a prompt as a command line argument.")
+    sys.exit(1)
+
+prompt = sys.argv[1]
+
 # Generate content using the gemini-2.0-flash-001 model
 response = client.models.generate_content(
     model="gemini-2.0-flash-001",
-    contents="Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum."
+    contents=prompt
 )
 
 # Print the model's response
