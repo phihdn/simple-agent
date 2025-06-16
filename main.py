@@ -36,6 +36,61 @@ def main():
     generate_content(client, messages, verbose)
 
 
+def call_function(function_call_part, verbose=False):
+    function_name = function_call_part.name
+    function_args = function_call_part.args
+    
+    # Print information based on verbosity level
+    if verbose:
+        print(f"Calling function: {function_name}({function_args})")
+    else:
+        print(f" - Calling function: {function_name}")
+    
+    # Create a dictionary mapping function names to actual functions
+    function_map = {
+        "get_files_info": get_files_info,
+        "get_file_content": get_file_content,
+        "run_python_file": run_python_file,
+        "write_file": write_file
+    }
+    
+    # Check if the function name is valid
+    if function_name not in function_map:
+        return types.Content(
+            role="tool",
+            parts=[
+                types.Part.from_function_response(
+                    name=function_name,
+                    response={"error": f"Unknown function: {function_name}"},
+                )
+            ],
+        )
+    
+    # Add working_directory to args and call the function
+    working_directory = "./calculator"
+    
+    # Get the function to call
+    func = function_map[function_name]
+    
+    # Create a copy of function_args to add working_directory
+    kwargs = dict(function_args)
+    kwargs["working_directory"] = working_directory
+    
+    # Call the function with the arguments
+    function_result = func(**kwargs)
+    
+    # Return the result in the expected format
+    return types.Content(
+        role="tool",
+        parts=[
+            types.Part.from_function_response(
+                name=function_name,
+                response={"result": function_result},
+            )
+        ],
+    )
+
+
 def generate_content(client, messages, verbose):
     # Create function schemas
     schema_get_files_info = types.FunctionDeclaration(
@@ -145,26 +200,19 @@ def generate_content(client, messages, verbose):
             if hasattr(part, 'function_call'):
                 # LLM made a function call
                 function_call_part = part.function_call
-                print(f"Calling function: {function_call_part.name}({function_call_part.args})")
                 
-                # Execute the appropriate function based on the function call
-                if function_call_part.name == "get_files_info":
-                    directory = function_call_part.args.get("directory", "")
-                    result = get_files_info(os.getcwd(), directory)
-                    print(result)
-                elif function_call_part.name == "get_file_content":
-                    file_path = function_call_part.args.get("file_path", "")
-                    result = get_file_content(os.getcwd(), file_path)
-                    print(result)
-                elif function_call_part.name == "run_python_file":
-                    file_path = function_call_part.args.get("file_path", "")
-                    result = run_python_file(os.getcwd(), file_path)
-                    print(result)
-                elif function_call_part.name == "write_file":
-                    file_path = function_call_part.args.get("file_path", "")
-                    content = function_call_part.args.get("content", "")
-                    result = write_file(os.getcwd(), file_path, content)
-                    print(result)
+                # Use the call_function to handle the function call
+                function_call_result = call_function(function_call_part, verbose)
+                
+                # Check if function_call_result has the expected structure
+                if not (hasattr(function_call_result, "parts") and 
+                        function_call_result.parts and 
+                        hasattr(function_call_result.parts[0], "function_response")):
+                    raise Exception("Invalid function call result format")
+                
+                # Print the result if in verbose mode
+                if verbose:
+                    print(f"-> {function_call_result.parts[0].function_response.response}")
             else:
                 # Regular text response
                 print("Response:")
