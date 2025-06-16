@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
-from functions.get_file_content import get_file_content
-
-
+from functions.write_file import write_file
 
 def main():
-    print('Test 1: get_file_content("calculator", "main.py")')
-    content = get_file_content("calculator", "main.py")
-    print(f"Content length: {len(content)} characters")
-    print(content)
+    print('Test 1: write_file("calculator", "lorem.txt", "wait, this isn\'t lorem ipsum")')
+    result = write_file("calculator", "lorem.txt", "wait, this isn't lorem ipsum")
+    print(result)
     
-    print('\nTest 2: get_file_content("calculator", "pkg/calculator.py")')
-    content = get_file_content("calculator", "pkg/calculator.py")
-    print(f"Content length: {len(content)} characters")
-    print(content)
+    print('\nTest 2: write_file("calculator", "pkg/morelorem.txt", "lorem ipsum dolor sit amet")')
+    result = write_file("calculator", "pkg/morelorem.txt", "lorem ipsum dolor sit amet")
+    print(result)
     
-    print('\nTest 3: get_file_content("calculator", "/bin/cat")')
-    print(get_file_content("calculator", "/bin/cat"))
-
+    print('\nTest 3: write_file("calculator", "/tmp/temp.txt", "this should not be allowed")')
+    result = write_file("calculator", "/tmp/temp.txt", "this should not be allowed")
+    print(result)
 
 if __name__ == "__main__":
     main()
